@@ -71,11 +71,13 @@ internal class _HTTPURLProtocol: URLProtocol {
                 fatalError("Need to solve pausing receive.")
             }
             if internalState.isEasyHandleAddedToMultiHandle && !newValue.isEasyHandleAddedToMultiHandle {
+                NSLog("Remove easyHandler")
                 task?.session.remove(handle: easyHandle)
             }
         }
         didSet {
             if !oldValue.isEasyHandleAddedToMultiHandle && internalState.isEasyHandleAddedToMultiHandle {
+                NSLog("Add easyHandler")
                 task?.session.add(handle: easyHandle)
             }
             if oldValue.isEasyHandlePaused && !internalState.isEasyHandlePaused {

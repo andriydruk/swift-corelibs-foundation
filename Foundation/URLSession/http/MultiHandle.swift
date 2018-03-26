@@ -78,12 +78,20 @@ fileprivate extension URLSession._MultiHandle {
         // Socket
         try! CFURLSession_multi_setopt_ptr(rawHandle, CFURLSessionMultiOptionSOCKETDATA, UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())).asError()
         try! CFURLSession_multi_setopt_sf(rawHandle, CFURLSessionMultiOptionSOCKETFUNCTION) { (easyHandle: CFURLSessionEasyHandle, socket: CFURLSession_socket_t, what: Int32, userdata: UnsafeMutableRawPointer?, socketptr: UnsafeMutableRawPointer?) -> Int32 in
+            NSLog("CFURLSessionMultiOptionSOCKETFUNCTION >>>")
+            defer {
+                NSLog("CFURLSessionMultiOptionSOCKETFUNCTION <<<")
+            }
             guard let handle = URLSession._MultiHandle.from(callbackUserData: userdata) else { fatalError() }
             return handle.register(socket: socket, for: easyHandle, what: what, socketSourcePtr: socketptr)
             }.asError()
         // Timeout:
         try! CFURLSession_multi_setopt_ptr(rawHandle, CFURLSessionMultiOptionTIMERDATA, UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())).asError()
         try! CFURLSession_multi_setopt_tf(rawHandle, CFURLSessionMultiOptionTIMERFUNCTION) { (_, timeout: Int, userdata: UnsafeMutableRawPointer?) -> Int32 in
+            NSLog("CFURLSessionMultiOptionTIMERFUNCTION >>>")
+            defer {
+                NSLog("CFURLSessionMultiOptionTIMERFUNCTION <<<")
+            }
             guard let handle = URLSession._MultiHandle.from(callbackUserData: userdata) else { fatalError() }
             handle.updateTimeoutTimer(to: timeout)
             return 0
