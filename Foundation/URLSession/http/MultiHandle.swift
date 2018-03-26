@@ -372,6 +372,7 @@ fileprivate extension URLSession._MultiHandle {
                 //TODO: Could simply change the existing timer by calling
                 // dispatch_source_set_timer() again.
                 let block = DispatchWorkItem { [weak self] in
+                    NSLog("timeoutTimerFired")
                     self?.timeoutTimerFired()
                 }
                 timeoutSource = _TimeoutSource(queue: queue, milliseconds: milliseconds, handler: block)
