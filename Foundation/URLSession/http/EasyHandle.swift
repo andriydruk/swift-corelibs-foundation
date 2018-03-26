@@ -283,6 +283,7 @@ extension _EasyHandle {
 
 fileprivate func printLibcurlDebug(handle: CFURLSessionEasyHandle, type: CInt, data: UnsafeMutablePointer<Int8>, size: Int, userInfo: UnsafeMutableRawPointer?) -> CInt {
     // C.f. <https://curl.haxx.se/libcurl/c/CURLOPT_DEBUGFUNCTION.html>
+    NSLog("DEBUG >>")
     let info = CFURLSessionInfo(value: type)
     let text = data.withMemoryRebound(to: UInt8.self, capacity: size, {
         let buffer = UnsafeBufferPointer<UInt8>(start: $0, count: size)
@@ -292,6 +293,7 @@ fileprivate func printLibcurlDebug(handle: CFURLSessionEasyHandle, type: CInt, d
     guard let userInfo = userInfo else { return 0 }
     let task = Unmanaged<URLSessionTask>.fromOpaque(userInfo).takeUnretainedValue()
     printLibcurlDebug(type: info, data: text, task: task)
+    NSLog("DEBUG <<")
     return 0
 }
 
