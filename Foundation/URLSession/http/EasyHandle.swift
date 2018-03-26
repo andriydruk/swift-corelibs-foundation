@@ -440,55 +440,69 @@ fileprivate extension _EasyHandle {
         try! CFURLSession_easy_setopt_ptr(rawHandle, CFURLSessionOptionWRITEDATA, UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())).asError()
         
         try! CFURLSession_easy_setopt_wc(rawHandle, CFURLSessionOptionWRITEFUNCTION) { (data: UnsafeMutablePointer<Int8>, size: Int, nmemb: Int, userdata: UnsafeMutableRawPointer?) -> Int in
+            NSLog("CFURLSessionOptionWRITEFUNCTION >> \(size * nmemb)")
             guard let handle = _EasyHandle.from(callbackUserData: userdata) else { return 0 }
             defer {
                 handle.resetTimer()
             }
-            return handle.didReceive(data: data, size: size, nmemb: nmemb)
+            let d = handle.didReceive(data: data, size: size, nmemb: nmemb)
+            NSLog("CFURLSessionOptionWRITEFUNCTION << \(d)")
+            return d
         }.asError()
         
         // read
         try! CFURLSession_easy_setopt_ptr(rawHandle, CFURLSessionOptionREADDATA, UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())).asError()
         try! CFURLSession_easy_setopt_wc(rawHandle, CFURLSessionOptionREADFUNCTION) { (data: UnsafeMutablePointer<Int8>, size: Int, nmemb: Int, userdata: UnsafeMutableRawPointer?) -> Int in
+            NSLog("CFURLSessionOptionREADFUNCTION >> \(size * nmemb)")
             guard let handle = _EasyHandle.from(callbackUserData: userdata) else { return 0 }
             defer {
                 handle.resetTimer()
             }
-            return handle.fill(writeBuffer: data, size: size, nmemb: nmemb)
+            let d = handle.fill(writeBuffer: data, size: size, nmemb: nmemb)
+            NSLog("CFURLSessionOptionREADFUNCTION << \(d)")
+            return d
         }.asError()
          
         // header
         try! CFURLSession_easy_setopt_ptr(rawHandle, CFURLSessionOptionHEADERDATA, UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())).asError()
         try! CFURLSession_easy_setopt_wc(rawHandle, CFURLSessionOptionHEADERFUNCTION) { (data: UnsafeMutablePointer<Int8>, size: Int, nmemb: Int, userdata: UnsafeMutableRawPointer?) -> Int in
-            print("CFURLSessionOptionHEADERFUNCTION >> \(size * nmemb)")
+            NSLog("CFURLSessionOptionHEADERFUNCTION >> \(size * nmemb)")
             guard let handle = _EasyHandle.from(callbackUserData: userdata) else { return 0 }
             defer {
+               
                 handle.resetTimer()
             }
             var length = Double()
             try! CFURLSession_easy_getinfo_double(handle.rawHandle, CFURLSessionInfoCONTENT_LENGTH_DOWNLOAD, &length).asError()
             let d = handle.didReceive(headerData: data, size: size, nmemb: nmemb, contentLength: length)
-            print("CFURLSessionOptionHEADERFUNCTION << \(d)")
+             NSLog("CFURLSessionOptionHEADERFUNCTION << \(d)")
             return d
         }.asError()
 
         // socket options
         try! CFURLSession_easy_setopt_ptr(rawHandle, CFURLSessionOptionSOCKOPTDATA, UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())).asError()
         try! CFURLSession_easy_setopt_sc(rawHandle, CFURLSessionOptionSOCKOPTFUNCTION) { (userdata: UnsafeMutableRawPointer?, fd: CInt, type: CFURLSessionSocketType) -> CInt in
+            
+            NSLog("CFURLSessionOptionSOCKOPTFUNCTION >> \(type)")
             guard let handle = _EasyHandle.from(callbackUserData: userdata) else { return 0 }
             guard type == CFURLSessionSocketTypeIPCXN else { return 0 }
             do {
                 try handle.setSocketOptions(for: fd)
+                NSLog("CFURLSessionOptionSOCKOPTFUNCTION << \(0)")
                 return 0
             } catch {
+                NSLog("CFURLSessionOptionSOCKOPTFUNCTION << \(1)")
                 return 1
             }
         }.asError()
         // seeking in input stream
         try! CFURLSession_easy_setopt_ptr(rawHandle, CFURLSessionOptionSEEKDATA, UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())).asError()
         try! CFURLSession_easy_setopt_seek(rawHandle, CFURLSessionOptionSEEKFUNCTION, { (userdata, offset, origin) -> Int32 in
+            NSLog("CFURLSessionOptionSEEKFUNCTION >> \(offset)")
             guard let handle = _EasyHandle.from(callbackUserData: userdata) else { return CFURLSessionSeekFail }
-            return handle.seekInputStream(offset: offset, origin: origin)
+            let d = handle.seekInputStream(offset: offset, origin: origin)
+            NSLog("CFURLSessionOptionSEEKFUNCTION << \(d)")
+            return d
         }).asError()
         
         // progress
@@ -498,8 +512,10 @@ fileprivate extension _EasyHandle {
         try! CFURLSession_easy_setopt_ptr(rawHandle, CFURLSessionOptionPROGRESSDATA, UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())).asError()
         
         try! CFURLSession_easy_setopt_tc(rawHandle, CFURLSessionOptionXFERINFOFUNCTION, { (userdata: UnsafeMutableRawPointer?, dltotal :Int64, dlnow: Int64, ultotal: Int64, ulnow: Int64) -> Int32 in
+            NSLog("CFURLSessionOptionXFERINFOFUNCTION >> \(dltotal)")
             guard let handle = _EasyHandle.from(callbackUserData: userdata) else { return -1 }
             handle.updateProgressMeter(with: _Progress(totalBytesSent: ulnow, totalBytesExpectedToSend: ultotal, totalBytesReceived: dlnow, totalBytesExpectedToReceive: dltotal))
+            NSLog("CFURLSessionOptionXFERINFOFUNCTION << \(dltotal)")
             return 0
         }).asError()
 
