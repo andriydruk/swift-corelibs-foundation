@@ -199,6 +199,7 @@ fileprivate extension URLSession._MultiHandle {
             let info = CFURLSessionMultiHandleInfoRead(rawHandle, &count)
             guard let handle = info.easyHandle else { break }
             let code = info.resultCode
+            NSLog("Info: \(info.resultCode)")
             completedTransfer(forEasyHandle: handle, easyCode: code)
         } while true
     }
