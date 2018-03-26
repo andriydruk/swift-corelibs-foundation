@@ -460,13 +460,16 @@ fileprivate extension _EasyHandle {
         // header
         try! CFURLSession_easy_setopt_ptr(rawHandle, CFURLSessionOptionHEADERDATA, UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())).asError()
         try! CFURLSession_easy_setopt_wc(rawHandle, CFURLSessionOptionHEADERFUNCTION) { (data: UnsafeMutablePointer<Int8>, size: Int, nmemb: Int, userdata: UnsafeMutableRawPointer?) -> Int in
+            print("CFURLSessionOptionHEADERFUNCTION >> \(size * nmemb)")
             guard let handle = _EasyHandle.from(callbackUserData: userdata) else { return 0 }
             defer {
                 handle.resetTimer()
             }
             var length = Double()
             try! CFURLSession_easy_getinfo_double(handle.rawHandle, CFURLSessionInfoCONTENT_LENGTH_DOWNLOAD, &length).asError()
-            return handle.didReceive(headerData: data, size: size, nmemb: nmemb, contentLength: length)
+            let d = handle.didReceive(headerData: data, size: size, nmemb: nmemb, contentLength: length)
+            print("CFURLSessionOptionHEADERFUNCTION << \(d)")
+            return d
         }.asError()
 
         // socket options
