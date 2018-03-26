@@ -188,6 +188,7 @@ fileprivate extension _HTTPURLProtocol {
         }
         let timeoutHandler = DispatchWorkItem { [weak self] in
             guard let _ = self?.task else { fatalError("Timeout on a task that doesn't exist") } //this guard must always pass
+            NSLog("Timeout handler")
             self?.internalState = .transferFailed
             let urlError = URLError(_nsError: NSError(domain: NSURLErrorDomain, code: NSURLErrorTimedOut, userInfo: nil))
             self?.completeTask(withError: urlError)

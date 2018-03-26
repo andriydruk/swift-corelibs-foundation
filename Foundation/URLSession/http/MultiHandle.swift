@@ -123,6 +123,13 @@ fileprivate extension URLSession._MultiHandle {
         }
         if let ss = socketSources {
             let handler = DispatchWorkItem { [weak self] in
+                if action.needsReadSource {
+                    NSLog("SokcketSource read event")
+                } else if action.needsWriteSource {
+                    NSLog("SokcketSource write event")
+                } else {
+                    NSLog("SokcketSource event")
+                }
                 self?.performAction(for: socket)
             }
             ss.createSources(with: action, fileDescriptor: Int(socket), queue: queue, handler: handler)
