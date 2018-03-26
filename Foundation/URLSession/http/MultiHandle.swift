@@ -109,6 +109,9 @@ fileprivate extension URLSession._MultiHandle {
         // by means of curl_multi_assign() -- we retain the object fist.
         let action = _SocketRegisterAction(rawValue: CFURLSessionPoll(value: what))
         var socketSources = _SocketSources.from(socketSourcePtr: socketSourcePtr)
+        
+        NSLog("Action: \(action) socket: \(socket) socketSources: \(socketSources != nil ? ObjectIdentifier(socketSources!).debugDescription : "nil")")
+        
         if socketSources == nil && action.needsSource {
             let s = _SocketSources()
             let p = Unmanaged.passRetained(s).toOpaque()
